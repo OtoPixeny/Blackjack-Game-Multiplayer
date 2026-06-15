@@ -4,7 +4,8 @@ const app = express();
 const server = require("http").createServer(app);
 const PORT = process.env.PORT || 8080;
 const WebSocket = require("ws")
-const WEB_URL = process.env.NODE_ENV === "production" ? `https://blackjack-game-multiplayer.wasmer.app/` : `https://blackjack-game-multiplayer.wasmer.app/`;
+
+const server = require("http").createServer(app);
 
 const wss = new WebSocket.Server({ server:server })
 
@@ -22,7 +23,7 @@ app.use(express.static("public", {
 }));
 
 server.listen(PORT, () =>
-  console.log(`Listening on ${process.env.PORT} or 8080`)
+  console.log(`Listening on ${PORT}`)
 );
 
 
@@ -38,18 +39,24 @@ let gameOn = null;
 
 
 
-wss.on("connection", (ws) => { // wsServer || wss AND request || connection
-  // Someone trying to connect
-  // const connection = connection.accept(null, connection.origin);
-  ws.on("open", () => console.log("opened")); // connection || wss
+wss.on("connection", (ws, req) => { // wsServer || wss AND request || connection
+  // Get the host from the request headers to construct WEB_URL dynamically
+  const host = req.headers.host;
+  const protocol = req.headers['x-forwarded-proto'] || 'http';
+  const WEB_URL = `${protocol}://${host}/`;
+
   ws.on("close", () => {
-    // connection || wss
     console.log("closed");
   });
 
   ws.on("message", (message) => {
-    // connection || wss
-    const result = JSON.parse(message);
+    let result;
+    try {
+      result = JSON.parse(message.toString());
+    } catch (e) {
+      console.error("Failed to parse message:", e);
+      return;
+    }
 
     // a user want to create a new game
     if (result.method === "create") {
@@ -58,10 +65,6 @@ wss.on("connection", (ws) => { // wsServer || wss AND request || connection
       const offline = result.offline;
       const roomId = partyId();
       const gameId = WEB_URL + roomId;
-
-      app.get("/" + roomId, (req, res) => {
-        res.sendFile(__dirname + "/public/index.html");
-      });
 
       // .route.path
       games[gameId] = {
@@ -644,15 +647,17 @@ wss.on("connection", (ws) => { // wsServer || wss AND request || connection
 
     if (result.method === "getRoute") {
       const getRouteId = result.getRouteId;
-      let isRouteDefined = null;
+      let isRouteDefined = false;
 
-      for (let i = 3; i < app._router.stack.length; i++) {
-        if (app._router.stack[i].route.path === "/" + getRouteId) {
+      // Check if the roomId exists in our games object instead of checking Express routes
+      // This is more reliable since we removed dynamic route creation
+      for (const gameId in games) {
+        if (gameId.endsWith("/" + getRouteId)) {
           isRouteDefined = true;
-        } else {
-          isRouteDefined = false;
+          break;
         }
       }
+
       // if route is not available, redirect to home page
       const payLoadRoute = {
         method: "redirect",
