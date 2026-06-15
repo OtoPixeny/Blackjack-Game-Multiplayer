@@ -3,11 +3,9 @@ const express = require("express");
 const app = express();
 const server = require("http").createServer(app);
 const PORT = process.env.PORT || 8080;
-const WebSocket = require("ws")
+const WebSocket = require("ws");
 
-const server = require("http").createServer(app);
-
-const wss = new WebSocket.Server({ server:server })
+const wss = new WebSocket.Server({ server: server });
 
 
 const cacheDuration = 1000 * 60 * 60 * 24 * 365; // 1 year
