@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "description": "Blackjack game frontend",
   "scripts": {
-    "build": "node build-script.js"
+    "build": "node build-script.js",
+    "vercel-build": "node build-script.js"
   },
   "dependencies": {}
 }
