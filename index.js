@@ -5,8 +5,6 @@ const server = require("http").createServer(app);
 const PORT = process.env.PORT || 8080;
 const WebSocket = require("ws")
 
-const server = require("http").createServer(app);
-
 const wss = new WebSocket.Server({ server:server })
 
 
