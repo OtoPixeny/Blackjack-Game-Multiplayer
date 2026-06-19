@@ -27,12 +27,8 @@ let timerStarted = false;
 let newPlayer = null;
 let offline = null;
 
-// BACKEND_URL will be replaced during build by build-script.js
-let HOST = "BACKEND_URL_PLACEHOLDER";
-if (HOST === "BACKEND_URL_PLACEHOLDER") {
-  // Fallback to local development
-  HOST = location.origin.replace(/^http/, "ws");
-}
+// Load backend URL from config
+let HOST = typeof BACKEND_URL !== 'undefined' ? BACKEND_URL : location.origin.replace(/^http/, "ws");
 let ws;
 
 function connect() {
