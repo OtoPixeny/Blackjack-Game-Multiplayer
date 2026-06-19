@@ -1,0 +1,9 @@
+services:
+  - type: site
+    name: blackjack-frontend
+    env: static
+    buildCommand: chmod +x render-build.sh && ./render-build.sh
+    envVars:
+      - key: BACKEND_URL
+        value: wss://bacendfordasta.onrender.com
+        sync: false
