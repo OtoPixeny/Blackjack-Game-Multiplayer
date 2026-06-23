@@ -3,3 +3,10 @@ rules.txt
 public/offline_mode.html
 Procfile
 node_modules/*
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+.env*
+!.env.example
